@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "471486445105",
+    "project_id": "protection-x",
+    "storage_bucket": "protection-x.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471486445105:android:143a5e66d48b423f370710",
+        "android_client_info": {
+          "package_name": "com.example.protectionx"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7QiDX0qS6B-nnMjMkw4LZvRWmbFHNsb4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
