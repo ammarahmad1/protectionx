@@ -1,13 +1,16 @@
-/*
-
+import 'package:background_sms/background_sms.dart';
 import 'package:flutter/material.dart';
-
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:protectionx/db/db_services.dart';
+import 'package:protectionx/model/contactsm.dart';
 
 class SafeHome extends StatefulWidget {
   @override
   State<SafeHome> createState() => _SafeHomeState();
 }
-
 
 class _SafeHomeState extends State<SafeHome> {
   Position? _curentPosition;
@@ -16,15 +19,22 @@ class _SafeHomeState extends State<SafeHome> {
 
   _isPermissionGranted() async => await Permission.sms.status.isGranted;
   _sendSms(String phoneNumber, String message, {int? simSlot}) async {
-    SmsStatus result = await BackgroundSms.sendMessage(
-        phoneNumber: phoneNumber, message: message, simSlot: 1);
-    if (result == SmsStatus.sent) {
-      print("Sent");
-      Fluttertoast.showToast(msg: "send");
-    } else {
-      Fluttertoast.showToast(msg: "failed");
+    try {
+      SmsStatus result = await BackgroundSms.sendMessage(
+          phoneNumber: phoneNumber, message: message, simSlot: simSlot ?? 1);
+      if (result == SmsStatus.sent) {
+        print("Sent");
+        Fluttertoast.showToast(msg: "Message sent successfully");
+      } else {
+        print("Failed: $result"); // Logging the result might give more clues.
+        Fluttertoast.showToast(msg: "Message sending failed");
+      }
+    } catch (e) {
+      print("Failed to send SMS: $e");
+      Fluttertoast.showToast(msg: "An error occurred while sending SMS: $e");
     }
   }
+
 
   Future<bool> _handleLocationPermission() async {
     bool serviceEnabled;
@@ -42,7 +52,7 @@ class _SafeHomeState extends State<SafeHome> {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location permissions are denied')));
+            const SnackBar(content: Text('Location permissions are denied, Please allow location permission')));
         return false;
       }
     }
@@ -90,7 +100,7 @@ class _SafeHomeState extends State<SafeHome> {
   @override
   void initState() {
     super.initState();
-
+    
     _getCurrentLocation();
   }
 
@@ -102,47 +112,49 @@ class _SafeHomeState extends State<SafeHome> {
           height: MediaQuery.of(context).size.height / 1.4,
           child: Padding(
             padding: const EdgeInsets.all(14.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Share your Location with your contacts",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20),
-                ),
-                SizedBox(height: 10),
-                if (_curentPosition != null) Text(_curentAddress!),
-                PrimaryButton(
-                    title: "GET LOCATION",
-                    onPressed: () {
-                      _getCurrentLocation();
-                    }),
-                SizedBox(height: 10),
-                PrimaryButton(
-                    title: "SEND ALERT",
-                    onPressed: () async {
-                      String recipients = "";
-                      List<TContact> contactList =
-                          await DatabaseHelper().getContactList();
-                      print(contactList.length);
-                      if (contactList.isEmpty) {
-                        Fluttertoast.showToast(
-                            msg: "emergency contact is empty");
-                      } else {
-                        String messageBody =
-                            "https://www.google.com/maps/search/?api=1&query=${_curentPosition!.latitude}%2C${_curentPosition!.longitude}. $_curentAddress";
-
-                        if (await _isPermissionGranted()) {
-                          contactList.forEach((element) {
-                            _sendSms("${element.number}",
-                                "i am in trouble $messageBody");
-                          });
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Share your Location with your contacts",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  SizedBox(height: 10),
+                  if (_curentPosition != null) Text(_curentAddress!),
+                  PrimaryButton(
+                      title: "GET LOCATION",
+                      onPressed: () {
+                        _getCurrentLocation();
+                      }),
+                  SizedBox(height: 10),
+                  PrimaryButton(
+                      title: "SEND ALERT",
+                      onPressed: () async {
+                        String recipients = "";
+                        List<TContact> contactList =
+                            await DatabaseHelper().getContactList();
+                        print(contactList.length);
+                        if (contactList.isEmpty) {
+                          Fluttertoast.showToast(
+                              msg: "emergency contact is empty");
                         } else {
-                          Fluttertoast.showToast(msg: "something wrong");
+                          String messageBody =
+                              "https://www.google.com/maps/search/?api=1&query=${_curentPosition!.latitude}%2C${_curentPosition!.longitude}. $_curentAddress";
+
+                          if (await _isPermissionGranted()) {
+                            contactList.forEach((element) {
+                              _sendSms("${element.number}",
+                                  "I am in trouble $messageBody");
+                            });
+                          } else {
+                            Fluttertoast.showToast(msg: "something wrong");
+                          }
                         }
-                      }
-                    }),
-              ],
+                      }),
+                ],
+              ),
             ),
           ),
           decoration: BoxDecoration(
@@ -168,7 +180,6 @@ class _SafeHomeState extends State<SafeHome> {
         child: Container(
           height: 180,
           width: MediaQuery.of(context).size.width * 0.7,
-          decoration: BoxDecoration(),
           child: Row(
             children: [
               Expanded(
@@ -181,8 +192,15 @@ class _SafeHomeState extends State<SafeHome> {
                 ],
               )),
               ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset('assets/emergency.jpg')),
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.3,
+                  child: Image.asset(
+                    'assets/emergency.jpg',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -209,7 +227,7 @@ class PrimaryButton extends StatelessWidget {
         },
         child: Text(
           title,
-          style: TextStyle(fontSize: 17),
+          style: TextStyle(fontSize: 14, color: Colors.white),
         ),
         style: ElevatedButton.styleFrom(
             backgroundColor: Colors.pink,
@@ -219,5 +237,3 @@ class PrimaryButton extends StatelessWidget {
     );
   }
 }
-
-*/

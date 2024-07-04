@@ -13,6 +13,11 @@ class MySharedPrefference {
     return await _preferences!.setString(key, type);
   }
 
+  static Future<void> clearUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+  }
+
   static Future<String>? getUserType() async =>
       await _preferences!.getString(key) ?? "";
 }

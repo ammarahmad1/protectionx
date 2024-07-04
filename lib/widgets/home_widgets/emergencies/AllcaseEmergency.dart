@@ -23,16 +23,24 @@ class AllcaseEmergency extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.asset(
-                  'assets/emergency.jpg',
-                  fit: BoxFit.cover,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white, width: 2.0),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Image.asset(
+                      'assets/emergency.jpg',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      
                       Expanded(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -47,7 +55,7 @@ class AllcaseEmergency extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              'Contact your loved ones',
+                              'Contact General Emergency',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: MediaQuery.of(context).size.width * 0.045,
@@ -62,19 +70,18 @@ class AllcaseEmergency extends StatelessWidget {
                               ),
                               child: Center(
                                 child: Text(
-                                  '-',
+                                  '911',
                                   style: TextStyle(
                                     color: Colors.red[300],
                                     fontWeight: FontWeight.bold,
-                                    fontSize:
-                                        MediaQuery.of(context).size.width * 0.050,
+                                    fontSize: MediaQuery.of(context).size.width * 0.050,
                                   ),
                                 ),
                               ),
                             ),
                           ],
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:protectionx/bottom_screens/add_contacts.dart';
 import 'package:protectionx/bottom_screens/chat_screen.dart';
+import 'package:protectionx/bottom_screens/contact_registry.dart';
 import 'package:protectionx/bottom_screens/contacts_screen.dart';
 import 'package:protectionx/bottom_screens/home_screen.dart';
 import 'package:protectionx/bottom_screens/profile_page.dart';
@@ -15,8 +17,9 @@ class _BottomPageState extends State<BottomPage> {
   int currentIndex=0;
   List<Widget> pages = [
     HomeScreen(),
-    ContactsPage(),
+    AddContactsPage(),
     ChatScreen(),
+    ContactRegistry(),
     ProfilePage(),
   ];
   onTapped(int index) {
@@ -45,11 +48,17 @@ class _BottomPageState extends State<BottomPage> {
             icon: Icon(
               Icons.contacts, 
               )),
+              
           BottomNavigationBarItem(
             label: 'chats',
             icon: Icon(
               Icons.chat, 
-              )),        
+              )),     
+          BottomNavigationBarItem(
+            label: 'Contact Registry',
+            icon: Icon(
+              Icons.quick_contacts_dialer_rounded, 
+              )),            
           BottomNavigationBarItem(
             label: 'Profile',
             icon: Icon(
